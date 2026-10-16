@@ -1,0 +1,72 @@
+{
+  "dataset": {
+    "cells": [
+      "B0005",
+      "B0006",
+      "B0007",
+      "B0018"
+    ],
+    "n_cycles": 480,
+    "n_samples": 105600,
+    "capacity_ah_mean": 1.7337999999999998,
+    "temperature_k_mean": 295.37732086181643,
+    "synthetic": true,
+    "root": "backend/data/nasa/BatteryData"
+  },
+  "calibration": {
+    "r0_ohm": 0.019087455598907174,
+    "r0_stderr_ohm": 0.0001097497034564117,
+    "ea_j_mol": 23499.112380714083,
+    "ea_stderr_j_mol": 0.04857603667013557,
+    "soc_quad": -0.00013323072326886762,
+    "soc_lin": 7.970009688584543e-05,
+    "ageing_per_100": 0.14521048403788125,
+    "ageing_stderr": 0.00018005504392839774,
+    "rmse_log_r": 0.000138532414470633,
+    "n_bins": 40,
+    "r_ref_25c": 0.019087455598907174,
+    "r_std_ohm": 0.005987420744995258,
+    "synthetic": true,
+    "usable": true,
+    "cell_capacity": {
+      "B0005": {
+        "capacity_ah": 2.0151205513772417,
+        "fade_per_cycle": 0.0025496625452685437,
+        "eol_capacity_pct": 73.76227700942071,
+        "capacity_fade_pct": 26.237722990579282,
+        "n_cycles": 120
+      },
+      "B0006": {
+        "capacity_ah": 2.0151205513772417,
+        "fade_per_cycle": 0.0025496625452685437,
+        "eol_capacity_pct": 73.76227700942071,
+        "capacity_fade_pct": 26.237722990579282,
+        "n_cycles": 120
+      },
+      "B0007": {
+        "capacity_ah": 2.0151205513772417,
+        "fade_per_cycle": 0.0025496625452685437,
+        "eol_capacity_pct": 73.76227700942071,
+        "capacity_fade_pct": 26.237722990579282,
+        "n_cycles": 120
+      },
+      "B0018": {
+        "capacity_ah": 2.0151205513772417,
+        "fade_per_cycle": 0.0025496625452685437,
+        "eol_capacity_pct": 73.76227700942071,
+        "capacity_fade_pct": 26.237722990579282,
+        "n_cycles": 120
+      }
+    }
+  },
+  "r_int_prior": {
+    "nmc": 0.017107923974618792,
+    "lfp": 0.018881759941158077
+  },
+  "n_obs_points": {
+    "nmc": 3840,
+    "lfp": 3840
+  },
+  "n_obs_points_total": 7680,
+  "n_collocation": 2048
+}

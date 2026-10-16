@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+:root {
+  --bg: 2 6 23;
+  --panel: 15 23 42;
+  --accent-sky: 56 189 248;
+  --accent-violet: 167 139 250;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  @apply bg-slate-950 text-slate-200 antialiased;
+  font-feature-settings: 'cv11', 'ss01';
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 90% 10%, rgba(167, 139, 250, 0.06), transparent);
+  background-attachment: fixed;
+}
+
+/* Scrollbars: thin and dark so they do not compete with the plots. */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgb(2 6 23);
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(51 65 85);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(71 85 105);
+}
+
+/* ==========================================================================
+   Components
+   ========================================================================== */
+
+@layer components {
+  .panel {
+    @apply rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur;
+  }
+
+  .panel-title {
+    @apply mb-2 text-sm font-semibold text-slate-200;
+  }
+
+  .kbd {
+    @apply rounded border border-slate-700 bg-slate-800 px-1 font-mono text-[10px] text-slate-300;
+  }
+
+  /* Numeric readouts: tabular figures stop the layout jittering as values
+     change at 2 Hz, which is otherwise very distracting on a live dashboard. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  /* Recharts overrides -- the library injects inline styles that fight the
+     dark theme unless we re-assert them with sufficient specificity. */
+  .recharts-cartesian-axis-tick text {
+    fill: #94a3b8;
+    font-size: 10px;
+  }
+
+  .recharts-legend-item-text {
+    color: #94a3b8 !important;
+    font-size: 11px;
+  }
+
+  .recharts-default-tooltip {
+    @apply rounded-lg border border-slate-700 bg-slate-950/95 shadow-xl;
+  }
+
+  .recharts-surface {
+    overflow: visible;
+  }
+
+  /* A subtle diagonal hatch marks windows where the controller was acting on a
+     prediction rather than on measurement. Kept in CSS (rather than a chart
+     prop) so it also applies to the non-chart surfaces. */
+  .hatch-advisory {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgba(251, 191, 36, 0.12) 0px,
+      rgba(251, 191, 36, 0.12) 2px,
+      transparent 2px,
+      transparent 8px
+    );
+  }
+
+  .hatch-enforced {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgba(56, 189, 248, 0.14) 0px,
+      rgba(56, 189, 248, 0.14) 2px,
+      transparent 2px,
+      transparent 6px
+    );
+  }
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+@layer utilities {
+  .grid-dash {
+    background-image:
+      linear-gradient(rgba(51, 65, 85, 0.25) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(51, 65, 85, 0.25) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  .text-shadow-glow {
+    text-shadow: 0 0 12px currentColor;
+  }
+}
+
+/* ==========================================================================
+   Accessibility: respect the OS reduced-motion preference. The charts rely on
+   hover/focus for detail, so motion is purely decorative and safe to drop.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print: the dashboard is frequently projected during a demo; a print stylesheet
+   that drops the fixed overlays keeps the printed page readable. */
+@media print {
+  .fixed {
+    position: static !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}

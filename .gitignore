@@ -1,0 +1,104 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+.ruff_cache/
+.mypy_cache/
+
+# PyTorch checkpoints and training artefacts
+#
+# The trained checkpoint (artifacts/pinn_dual_chemistry.pt, ~500 KB) IS
+# committed: it is the evidence that the model trained, and it lets a reviewer
+# reproduce every number in the model card without a multi-hour retrain.
+# 500 KB is far below GitHub's 100 MB per-file limit.
+#
+# Everything else under artifacts/ is a transient of a training run -- backups
+# written by the auto-healer, optimiser state -- and is excluded.
+artifacts/*.pth
+artifacts/*.ckpt
+artifacts/**/*.tmp
+*.bak
+*.bak.*
+*.heal.tmp
+
+# Logs. The auto-healer's own log is regenerated on every run and embeds
+# absolute paths from the machine that produced it.
+logs/
+*.log
+*.jsonl
+
+# Training console output. This one matters more than it looks: a redirected
+# training log records the interpreter's absolute argv[0], so it contains the
+# *user's home directory* on its first lines. artifacts/pinn_metrics.json and
+# artifacts/pinn_provenance.json are the durable results and are committed.
+artifacts/train_log.txt
+artifacts/*.stdout
+artifacts/*.stderr
+
+# LaTeX build products.
+#
+# NOTE: docs/*.pdf is deliberately NOT ignored. docs/Model_Card_Gen_AI.pdf is
+# the compiled model card -- a submission artefact, not a build intermediate.
+# The rules below cover only what pdflatex actually emits as scratch.
+docs/*.aux
+docs/*.bbl
+docs/*.blg
+docs/*.fdb_latexmk
+docs/*.fls
+docs/*.out
+docs/*.synctex.gz
+docs/*.toc
+docs/run-*
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/coverage/
+frontend/.env.local
+frontend/.env*.local
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+!.env.local.example
+*.pem
+*.key
+
+# Datasets (never commit: not redistributable)
+backend/data/nasa/**/*.mat
+backend/data/nasa/**/*.zip
+backend/data/nasa/**/*.h5

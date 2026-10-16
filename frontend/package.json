@@ -1,0 +1,53 @@
+{
+  "name": "heatwave-btms-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Heatwave-Aware AI-Assisted Microchannel Battery Thermal Management Dashboard for EVs",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
+    "analyze": "ANALYZE=true next build"
+  },
+  "dependencies": {
+    "next": "14.2.23",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "recharts": "2.15.0",
+    "clsx": "2.1.1",
+    "tailwind-merge": "2.6.0",
+    "lucide-react": "0.468.0",
+    "zustand": "5.0.2",
+    "swr": "2.2.5",
+    "d3-scale": "4.0.2"
+  },
+  "devDependencies": {
+    "typescript": "5.7.2",
+    "@types/react": "18.3.17",
+    "@types/react-dom": "18.3.5",
+    "@types/node": "22.10.2",
+    "tailwindcss": "3.4.17",
+    "postcss": "8.4.49",
+    "autoprefixer": "10.4.20",
+    "eslint": "8.57.1",
+    "eslint-config-next": "14.2.23",
+    "prettier": "3.4.2",
+    "prettier-plugin-tailwindcss": "0.6.9",
+    "vitest": "2.1.8",
+    "@vitest/coverage-v8": "2.1.8",
+    "@testing-library/react": "16.1.0",
+    "@testing-library/jest-dom": "6.6.3",
+    "jsdom": "25.0.1",
+    "@types/d3-scale": "4.0.9"
+  }
+}

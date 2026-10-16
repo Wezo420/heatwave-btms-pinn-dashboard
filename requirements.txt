@@ -1,0 +1,76 @@
+# ===========================================================================
+# Heatwave-Aware AI-Assisted Microchannel Battery Thermal Management Dashboard
+# Python dependency set
+#
+# Install:
+#   python -m venv .venv
+#   .venv\Scripts\activate        (Windows)
+#   source .venv/bin/activate     (macOS / Linux)
+#   pip install -r requirements.txt
+#
+# NOTE ON VERSIONS
+#   Python 3.10 - 3.12 is the supported window. PyTorch wheels for 3.13/3.14
+#   lag; on newer interpreters install the CPU build explicitly:
+#     pip install torch --index-url https://download.pytorch.org/whl/cpu
+#
+#   These pins are the set verified to run the full test suite. Where a pin
+#   matters for a *behavioural* reason rather than an API one, the reason is
+#   noted inline -- langgraph below is the clearest case.
+# ===========================================================================
+
+# --- Web framework ---------------------------------------------------------
+fastapi>=0.115,<0.116
+uvicorn[standard]>=0.34
+python-multipart==0.0.20
+websockets>=14.1
+
+# --- Deep learning ---------------------------------------------------------
+# torch is installed separately on some platforms; see README for the CUDA
+# and CPU index URLs. The lower bound is 2.5 (the first NumPy-2-compatible
+# release); there is deliberately **no** upper bound, because the wheels
+# published to the CPU index lag PyPI and a hard ceiling makes the requirements
+# file uninstallable on a machine that already has a newer build. The code uses
+# no torch API newer than 2.5 and no deprecated one, so both directions are safe.
+#   CPU-only:  pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch>=2.5
+numpy>=2.1
+
+# --- Scientific stack ------------------------------------------------------
+# Optional for the NASA loader: the pure-Python MAT v5 reader in
+# backend/models/nasa_dataset.py handles the release format without them, and
+# every code path that needs them is guarded and falls back to the synthetic
+# run-to-failure generator. Install for the real dataset.
+scipy>=1.14             # .mat (MATLAB v5/v7.3) reading for the NASA dataset
+pandas>=2.2,<2.3        # tabular post-processing of cycle data
+h5py>=3.12              # MATLAB v7.3 / HDF5 fallback reader
+
+# --- Validation & configuration -------------------------------------------
+pydantic>=2.10,<3
+pydantic-settings>=2.7
+python-dotenv>=1.0
+
+# --- Agentic self-healing (Part C) ----------------------------------------
+# Pinned at the 1.x line deliberately. The 0.2.x line is incompatible with
+# auto_heal/graph.py: LangGraph >= 1.0 requires an explicit thread_id in the
+# graph config before it will write to a checkpointer, and every StateGraph
+# invocation now needs {"configurable": {"thread_id": ...}}. Passing the 0.2
+# API to a 1.x install raises KeyError; passing the 1.x config to 0.2 raises
+# an unexpected-keyword error. The call site passes it, so 1.x is required.
+langgraph>=1.0,<2
+langchain-core>=0.3
+langchain-openai>=0.2
+
+# --- Logging & CLI ---------------------------------------------------------
+rich>=13.9
+typer>=0.15
+
+# --- Optional: direct LLM access for the healing agent --------------------
+# The agent works with a deterministic, rule-based hypothesiser when this is
+# absent, so it is a hard requirement only for LLM-backed patching.
+openai>=1.59
+tiktoken>=0.8
+
+# --- Testing ---------------------------------------------------------------
+pytest>=8.3
+pytest-asyncio>=0.25
+httpx>=0.28              # required by fastapi.testclient
