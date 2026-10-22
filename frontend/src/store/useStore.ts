@@ -24,6 +24,7 @@ import type {
   ActuationEvent,
   BootstrapResponse,
   CatalogueResponse,
+  ChemistryInfo,
   ChemistryKey,
   ComparisonResponse,
   FieldResponse,
@@ -33,6 +34,10 @@ import type {
   SimulationResponse,
   TelemetryFrame,
   TripState,
+} from '@/lib/types';
+import {
+  DEFAULT_PACK_CURRENT_A,
+  BASELINE_CRUISE_FLOW_LPM,
 } from '@/lib/types';
 
 const MAX_FRAMES = 900;
@@ -110,10 +115,18 @@ export interface DashboardState {
 
 const DEFAULT_INPUTS: OperatingInputs = {
   ambientC: 38,
-  packCurrentA: 180,
+  // Pack current is the *pack's own* continuous limit, 96s1p at ~2C of 9.7 Ah.
+  // 180 A was the value from the pre-topology layout (a parallel-string pack),
+  // where the pack current was split across strings. In a series pack the pack
+  // current *is* the string current and the ceiling is 20 A -- a request for
+  // 180 A makes the Arrhenius resistance extrapolate ~90x past its fitted range.
+  // The backend rejects it with 422, and because the field/preview calls retry
+  // on failure, an out-of-range default turned into a request storm that drove
+  // React past its update-depth limit.
+  packCurrentA: DEFAULT_PACK_CURRENT_A,
   stateOfCharge: 0.65,
   coolantInletC: 26,
-  baseFlowLpm: 6,
+  baseFlowLpm: BASELINE_CRUISE_FLOW_LPM,
   mode: 'inference',
 };
 
@@ -257,29 +270,67 @@ function computeP95(values: number[]): number {
 /* Derived selectors                                                  */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Catalogue fallbacks, one stable object per chemistry.
+ *
+ * `selectChemSpec` must return a *referentially stable* value. Zustand's
+ * `useStore(selector)` calls the selector on every render and compares the
+ * result with `Object.is` against the previous snapshot; if the selector
+ * manufactures a new object each time, every render looks like a store change,
+ * Zustand schedules another render, and React terminates the loop with
+ * "Maximum update depth exceeded".
+ *
+ * This fires on the very first paint, when `catalogue` is still null -- before
+ * `/api/demo/bootstrap` has returned -- which is why the dashboard crashed
+ * outright rather than settling once the catalogue arrived. Hoisting the
+ * fallback per chemistry makes the returned reference depend only on
+ * `state.chemistry`, so the comparison is stable across renders.
+ */
+const CHEM_FALLBACKS: Record<ChemistryKey, ChemistryInfo> = {
+  nmc: {
+    key: 'nmc',
+    label: 'NMC',
+    cathodes: '--',
+    anode: '--',
+    cp_j_kgk: 1040,
+    thermal_runaway_onset_c: 210,
+    internal_resistance_reference_ohm: 0.0135,
+    activation_energy_j_mol: 23500,
+    nominal_capacity_ah: 4.85,
+    energy_density_wh_kg: 255,
+    thermal_diffusivity_m2_s: 0,
+    coolant: { density_kg_m3: 1051, cp_j_kgk: 3400, k_w_mk: 0.505, mu_pa_s: 0.00205, prandtl: 13.8 },
+    channels: { n_channels: 24, channel_width_mm: 2.2, channel_depth_mm: 3.5, length_mm: 360, width_mm: 230 },
+    notes: 'Catalogue not loaded; using documented defaults.',
+    recommended_max_cell_temp_c: 42,
+    default_flow_setpoint_lpm: 6,
+  },
+  lfp: {
+    key: 'lfp',
+    label: 'LFP',
+    cathodes: '--',
+    anode: '--',
+    cp_j_kgk: 1150,
+    thermal_runaway_onset_c: 270,
+    internal_resistance_reference_ohm: 0.0182,
+    activation_energy_j_mol: 19800,
+    nominal_capacity_ah: 5.2,
+    energy_density_wh_kg: 165,
+    thermal_diffusivity_m2_s: 0,
+    coolant: { density_kg_m3: 1051, cp_j_kgk: 3400, k_w_mk: 0.505, mu_pa_s: 0.00205, prandtl: 13.8 },
+    channels: { n_channels: 24, channel_width_mm: 2.2, channel_depth_mm: 3.5, length_mm: 360, width_mm: 230 },
+    notes: 'Catalogue not loaded; using documented defaults.',
+    recommended_max_cell_temp_c: 47,
+    default_flow_setpoint_lpm: 6,
+  },
+};
+
 /** Chemistry metadata for the current selection, or a safe fallback. */
-export function selectChemSpec(state: DashboardState) {
+export function selectChemSpec(state: DashboardState): ChemistryInfo {
   const found = state.catalogue?.chemistries.find((c) => c.key === state.chemistry);
-  return (
-    found ?? {
-      key: state.chemistry,
-      label: state.chemistry.toUpperCase(),
-      cathodes: '--',
-      anode: '--',
-      cp_j_kgk: state.chemistry === 'nmc' ? 1040 : 1150,
-      thermal_runaway_onset_c: state.chemistry === 'nmc' ? 210 : 270,
-      internal_resistance_reference_ohm: state.chemistry === 'nmc' ? 0.0135 : 0.0182,
-      activation_energy_j_mol: state.chemistry === 'nmc' ? 23500 : 19800,
-      nominal_capacity_ah: state.chemistry === 'nmc' ? 4.85 : 5.2,
-      energy_density_wh_kg: state.chemistry === 'nmc' ? 255 : 165,
-      thermal_diffusivity_m2_s: 0,
-      coolant: { density_kg_m3: 1051, cp_j_kgk: 3400, k_w_mk: 0.505, mu_pa_s: 0.00205, prandtl: 13.8 },
-      channels: { n_channels: 24, channel_width_mm: 2.2, channel_depth_mm: 3.5, length_mm: 360, width_mm: 230 },
-      notes: 'Catalogue not loaded; using documented defaults.',
-      recommended_max_cell_temp_c: state.chemistry === 'nmc' ? 42 : 47,
-      default_flow_setpoint_lpm: 6,
-    }
-  );
+  // Stable reference: either the catalogue entry, or one of two module-level
+  // objects. Never a fresh literal.
+  return found ?? CHEM_FALLBACKS[state.chemistry];
 }
 
 /** Comfort ceiling for the active chemistry. */

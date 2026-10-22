@@ -20,7 +20,7 @@ import type { ComparisonEntry } from '@/lib/types';
 
 interface Props {
   className?: string;
-  onLoad: () => void;
+  onLoad?: () => void;
   loading?: boolean;
 }
 
@@ -28,7 +28,7 @@ export default function ChemistryComparisonCard({ className, onLoad, loading }: 
   const comparison = useStore((s) => s.comparison);
 
   useEffect(() => {
-    if (!comparison) onLoad();
+    if (!comparison && onLoad) onLoad();
   }, [comparison, onLoad]);
 
   if (loading && !comparison) {

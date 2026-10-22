@@ -27,8 +27,18 @@ interface Props {
   disabled?: boolean;
 }
 
-export default function ChemistryToggle({ chemistries, value, onChange, disabled }: Props) {
+export default function ChemistryToggle({
+  chemistries,
+  value,
+  onChange,
+  disabled,
+}: Props) {
   const refs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  // `chemistries` is typed required, but `Dashboard` passes
+  // `catalogue?.chemistries ?? []` and a defensive default costs nothing while
+  // turning a missing prop into the loading placeholder rather than a crash.
+  const list = chemistries ?? [];
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent, index: number) => {
@@ -36,17 +46,17 @@ export default function ChemistryToggle({ chemistries, value, onChange, disabled
       e.preventDefault();
       const nextIndex =
         e.key === 'ArrowRight'
-          ? (index + 1) % chemistries.length
-          : (index - 1 + chemistries.length) % chemistries.length;
-      const next = chemistries[nextIndex];
+          ? (index + 1 + list.length) % list.length
+          : (index - 1 + list.length) % list.length;
+      const next = list[nextIndex];
       if (!next) return;
       onChange(next.key);
       refs.current[nextIndex]?.focus();
     },
-    [chemistries, onChange],
+    [list, onChange],
   );
 
-  if (chemistries.length === 0) {
+  if (list.length === 0) {
     return (
       <div className="flex items-center gap-2 text-sm text-slate-400">
         <span className="inline-block h-4 w-24 animate-pulse rounded bg-slate-700" />
@@ -61,7 +71,7 @@ export default function ChemistryToggle({ chemistries, value, onChange, disabled
       aria-label="Battery chemistry"
       className="inline-flex flex-col gap-1.5 rounded-xl border border-slate-700/60 bg-slate-900/60 p-1.5 backdrop-blur sm:flex-row sm:gap-2"
     >
-      {chemistries.map((chem, index) => {
+      {list.map((chem, index) => {
         const active = chem.key === value;
         const accent = chem.key === 'nmc' ? 'nmc' : 'lfp';
         return (

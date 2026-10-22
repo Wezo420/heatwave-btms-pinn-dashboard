@@ -28,6 +28,10 @@ import type {
   TelemetryFrame,
   TripState,
 } from './types';
+import {
+  BASELINE_CRUISE_FLOW_LPM,
+  DEFAULT_PACK_CURRENT_A,
+} from './types';
 
 export const API_BASE = '/api';
 
@@ -152,9 +156,9 @@ export const getFieldPreview = (params: FieldParams) =>
       ny: params.ny ?? 12,
       nz: params.nz ?? 8,
       coolant_inlet_c: params.coolant_inlet_c ?? 26,
-      coolant_flow_lpm: params.coolant_flow_lpm ?? 6,
+      coolant_flow_lpm: params.coolant_flow_lpm ?? BASELINE_CRUISE_FLOW_LPM,
       ambient_c: params.ambient_c ?? 34,
-      pack_current_a: params.pack_current_a ?? 180,
+      pack_current_a: params.pack_current_a ?? DEFAULT_PACK_CURRENT_A,
       state_of_charge: params.state_of_charge ?? 0.5,
     },
   });
@@ -212,10 +216,10 @@ export const getResiduals = (params: FieldParams) =>
   }>('/predict/residuals', {
     query: {
       chemistry: params.chemistry,
-      coolant_flow_lpm: params.coolant_flow_lpm ?? 6,
+      coolant_flow_lpm: params.coolant_flow_lpm ?? BASELINE_CRUISE_FLOW_LPM,
       coolant_inlet_c: params.coolant_inlet_c ?? 26,
       ambient_c: params.ambient_c ?? 34,
-      pack_current_a: params.pack_current_a ?? 180,
+      pack_current_a: params.pack_current_a ?? DEFAULT_PACK_CURRENT_A,
       state_of_charge: params.state_of_charge ?? 0.5,
     },
   });

@@ -1,6 +1,10 @@
 MIT License
 
+<<<<<<< HEAD
 Copyright (c) 2026 Heatwave-Aware BTMS Project Team
+=======
+Copyright (c) 2026 Wezo420
+>>>>>>> 30c0abc248664790f21dfbb3caa67c55f5bcc506
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,6 +23,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+<<<<<<< HEAD
 
 --------------------------------------------------------------------------------
 THIRD-PARTY DATA
@@ -41,3 +46,5 @@ This software is a research and educational artefact intended for
 hardware-in-the-loop evaluation. It is NOT a certified battery protection
 system and must not be deployed in a production vehicle. See
 docs/model_card.tex, Section 4 (Ethical Considerations & Safety).
+=======
+>>>>>>> 30c0abc248664790f21dfbb3caa67c55f5bcc506

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Heatwave-Aware AI-Assisted Microchannel Battery Thermal Management Dashboard for EVs
 
 A dual-chemistry physics-informed neural network predicting the **3-D temperature
@@ -206,3 +207,7 @@ Stated plainly, and in full in §IV of the model card:
 ## License
 
 MIT — see [LICENSE](LICENSE).
+=======
+# heatwave-btms-pinn-dashboard
+Heatwave-aware AI-assisted microchannel battery thermal management for EVs.  Dual-chemistry (NMC/LFP) physics-informed neural network predicting the 3-D temperature field of a liquid-cooled microchannel pack from a single shared parameter set, with an anticipatory coolant controller and a LangGraph self-healing supervisor.
+>>>>>>> 30c0abc248664790f21dfbb3caa67c55f5bcc506

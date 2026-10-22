@@ -21,6 +21,50 @@ export type TripState = 'ok' | 'derate' | 'trip';
 export type Authority = 'advisory' | 'enforced';
 
 /* ------------------------------------------------------------------ */
+/* Pack limits                                                         */
+/*                                                                     */
+/* These mirror the backend constants in backend/config.py. They are     */
+/* duplicated rather than fetched at runtime because the dashboard       */
+/* must be usable (and must not crash) before the backend answers --     */
+/* and because an out-of-range value here used to be sent unvalidated    */
+/* and rejected with 422, which the retry logic then hammered.           */
+/* ------------------------------------------------------------------ */
+
+/** Pack topology: 96 series cells, 1 parallel string. */
+export const PACK_SERIES_CELLS = 96;
+export const PACK_PARALLEL_STRINGS = 1;
+
+/**
+ * Maximum continuously addressable pack current, A.
+ *
+ * ~2C of the 9.7 Ah pack. In a series pack the pack current *is* the string
+ * current, so this is also the cell ceiling. A request above it would make the
+ * Arrhenius resistance extrapolate ~90x past its fitted range; the backend
+ * rejects such a request with 422 rather than extrapolate.
+ */
+export const MAX_PACK_CURRENT_A = 20;
+
+/** Default cruise pack current, A (~1.2C). */
+export const DEFAULT_PACK_CURRENT_A = 12;
+
+/** Coolant flow window the BMS can actually command, L/min. */
+export const MIN_COOLANT_FLOW_LPM = 0.8;
+export const MAX_COOLANT_FLOW_LPM = 14;
+
+/**
+ * Part-load cruise flow, L/min.
+ *
+ * The *baseline* the anticipatory planner is scored against. At 6 L/min the
+ * cold plate holds the pack ~11 K above the 42 degC ceiling with nothing left
+ * for the controller to anticipate; the claim only has content against a
+ * part-load baseline with a pre-warmed pack.
+ */
+export const BASELINE_CRUISE_FLOW_LPM = 2.0;
+
+/** Pack temperature at scenario start, degC -- post-DC-fast-charge. */
+export const PRE_FAST_CHARGE_TEMP_C = 38.0;
+
+/* ------------------------------------------------------------------ */
 /* Catalogue                                                          */
 /* ------------------------------------------------------------------ */
 

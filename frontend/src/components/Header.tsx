@@ -83,7 +83,10 @@ export default function Header({ wsStatus, latencyP95, className }: Props) {
             ok={wsStatus === 'open'}
             warn={wsStatus === 'connecting' || wsStatus === 'stale'}
             icon={<Radio className="h-3 w-3" />}
-            label={`WS ${wsStatus.toUpperCase()}`}
+            // `wsStatus` is typed non-optional, but a component that throws on a
+            // missing prop turns a presentational mistake into a full tree
+            // crash. Default to 'idle', which is the hook's initial state.
+            label={`WS ${(wsStatus ?? 'idle').toUpperCase()}`}
             pulse={wsStatus === 'open'}
           />
 
