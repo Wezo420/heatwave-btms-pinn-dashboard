@@ -1,0 +1,498 @@
+\documentclass[10.5pt,a4paper]{article}
+% ============================================================
+% Packages
+% ============================================================
+\usepackage[margin=2.0cm,top=2.3cm,bottom=2.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage[table]{xcolor}
+\usepackage{colortbl}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{needspace}
+\usepackage[colorlinks=true,linkcolor=accent,urlcolor=accent,citecolor=accent]{hyperref}
+% ============================================================
+% Palette (black and white)
+% ============================================================
+\definecolor{navy}{HTML}{000000}
+\definecolor{accent}{HTML}{000000}
+\definecolor{keybg}{HTML}{EDEDED}
+\definecolor{rowgray}{HTML}{F5F5F5}
+\definecolor{sectbg}{HTML}{DCDCDC}
+\definecolor{codebg}{HTML}{F3F3F3}
+\definecolor{okgreen}{HTML}{000000}
+\definecolor{warn}{HTML}{000000}
+\definecolor{bad}{HTML}{000000}
+\definecolor{calloutbg}{HTML}{F7F7F7}
+\definecolor{rulegray}{HTML}{999999}
+% ============================================================
+% Headings, lists, header/footer
+% ============================================================
+\titleformat{\section}{\Large\bfseries\color{navy}}{}{0em}{}[{\color{accent}\titlerule[1.4pt]}]
+\titleformat{\subsection}{\large\bfseries\color{navy}}{}{0em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{accent}}{}{0em}{}
+\titlespacing*{\section}{0pt}{1.5em}{0.9em}
+\titlespacing*{\subsection}{0pt}{1.1em}{0.4em}
+\titlespacing*{\subsubsection}{0pt}{0.9em}{0.2em}
+\setlist[itemize]{leftmargin=1.3em,itemsep=2pt,topsep=3pt,label=\textcolor{accent}{\textbullet}}
+\renewcommand{\arraystretch}{1.3}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+\setlength{\tabcolsep}{5pt}
+\arrayrulecolor{rulegray}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.6pt}
+\renewcommand{\headrule}{\color{accent}\hrule width\headwidth height\headrulewidth}
+\fancyhead[L]{\small\color{navy}\textbf{MicrochannelPINN} \textcolor{gray}{| Model Card}}
+\fancyhead[R]{\small\color{gray}v1.0}
+\fancyfoot[C]{\small\color{gray}\thepage}
+% ============================================================
+% Code listings
+% ============================================================
+\lstdefinestyle{card}{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{navy}\bfseries,
+  commentstyle=\color{okgreen}\itshape,
+  stringstyle=\color{accent},
+  breaklines=true,
+  frame=leftline,
+  framerule=2.5pt,
+  rulecolor=\color{accent},
+  xleftmargin=6pt,
+  framesep=6pt,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false
+}
+\lstset{style=card}
+% ============================================================
+% Helpers
+% ============================================================
+\newcommand{\ok}{\textcolor{okgreen}{\textbf{verified}}}
+\newcommand{\fail}{\textbf{\underline{not met}}}
+\newcommand{\met}{\textcolor{okgreen}{\textbf{met}}}
+\newcommand{\code}[1]{\texttt{\textcolor{navy}{#1}}}
+\newcolumntype{K}{>{\columncolor{keybg}\raggedright\arraybackslash\bfseries\leavevmode\color{navy}}p{4.3cm}}
+\newcolumntype{V}{>{\raggedright\arraybackslash}X}
+\newcommand{\tablehead}[1]{\textcolor{white}{\textbf{#1}}}
+% Coloured call-out box
+\newcommand{\callout}[2]{%
+  \par\vspace{0.3em}\noindent
+  \fcolorbox{accent}{calloutbg}{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{%
+    \vspace{2pt}\textbf{\textcolor{accent}{#1}}\\[2pt]#2\vspace{2pt}}}\par\vspace{0.3em}}
+% ============================================================
+\begin{document}
+% ============================================================
+% ---------------- Title banner ----------------
+\noindent\rule{\linewidth}{1.5pt}
+\begin{center}
+  {\fontsize{24}{28}\selectfont\bfseries Model Card}\\[6pt]
+  {\large Dual-Chemistry Physics-Informed Neural Network for\\
+  Heatwave-Aware Microchannel Battery Thermal Management}\\[8pt]
+  {\small\textsc{MicrochannelPINN}}\\[4pt]
+  {\small
+  Attharv Kumar Jain (16014223020) \quad|\quad
+  Aviral Sharma (16014223024) \quad|\quad
+  Ayush Shaw (16014223027)\\[2pt]
+  Branch AI \& Data Science / Generative AI Laboratory}
+\end{center}
+\vspace{-0.3em}\noindent\rule{\linewidth}{1.5pt}
+\vspace{0.8em}
+
+% ---------------- Model Summary ----------------
+\section*{Model Summary}
+\begin{tabularx}{\linewidth}{@{}KV@{}}
+\toprule
+Total Parameters & 123,685 (shared by both chemistries) \\
+\midrule
+Architecture & Siren trunk with random Fourier features and FiLM chemistry conditioning; adjoint-derived physics residual \\
+\midrule
+Output Domain & 3-D temperature field over the cold-plate domain $\Omega\subset[0,0.360]\times[0,0.230]\times[0,0.012]$~m, plus elapsed time \\
+\midrule
+Supported Chemistries & NMC (exotherm onset 210~$^\circ$C) and LFP (exotherm onset 270~$^\circ$C) \\
+\midrule
+Best For & Predictive, advisory element of a battery thermal management loop; hardware-in-the-loop (HIL) evaluation \\
+\midrule
+Not For & Protection relays, thermal-trip arbitration, SOC/SOH estimation \\
+\midrule
+System Stack & PyTorch model, FastAPI inference service, Next.js 14 dashboard, LangGraph self-healing monitor \\
+\midrule
+Edge Budget & 800~ms p95 latency target (measured 8.06~ms on CPU); $\le 2$~MB after 16-bit quantisation \\
+\midrule
+Current Status & Ready for HIL evaluation only. \textcolor{bad}{\textbf{Spatial accuracy is below target}} (see Benchmarks). \\
+\midrule
+License & MIT \\
+\midrule
+Repository & \url{https://github.com/Wezo420/heatwave-btms-pinn-dashboard} \\
+\bottomrule
+\end{tabularx}
+
+% ---------------- Model Overview ----------------
+\section*{Model Overview}
+\textbf{Model Developer:} Heatwave-Aware BTMS Project Team, Branch AI \& Data Science / Generative AI Laboratory.\\
+\textbf{Model Dates:} Reference training run generated 16 October 2026 (UTC); seed 1337; CPU-only.\\
+\textbf{Data Freshness:} Physics components use published correlations. Empirical calibration uses the NASA PCoE Battery Data Set (2015 release); in the shipped repository a deterministic synthetic generator substitutes for it (see Training and Evaluation Datasets).
+
+\subsection*{What is MicrochannelPINN?}
+MicrochannelPINN is a physics-informed neural network that predicts the three-dimensional temperature field of a liquid-cooled microchannel EV battery pack. One shared parameter set serves both NMC and LFP chemistries. Chemistry is selected by a 12-dimensional descriptor vector through FiLM conditioning, not by swapping checkpoints.
+
+\subsection*{Description}
+\textbf{MicrochannelPINN} predicts a continuous temperature field $T:\Omega\times\mathcal{T}\to\mathbb{R}$ over the cold-plate domain, parameterised by spatial position and elapsed time, under a specified operating point (pack current, state of charge, coolant inlet temperature, coolant mass flow, ambient temperature).
+The network couples a Siren trunk with random Fourier features and FiLM chemistry conditioning to three physics terms: an adjoint-derived residual of the anisotropic conduction equation with an Arrhenius Joule source; a reduced Navier--Stokes momentum balance over an exact plane-Poiseuille stream-function ansatz; and conjugate temperature/flux continuity at the bonded cold-plate interface. Loss terms are rebalanced by an exponential-moving-average gradient-norm penalty. Internal resistance is regressed from NASA-style run-to-failure cycle data rather than assumed.
+The model is delivered with an \textbf{anticipatory coolant controller} that ramps flow before a predicted high-temperature zone, and a \textbf{self-healing supervisor} for the inference service. The network is advisory with respect to actuation; all thermal safety decisions remain with a non-learned fail-safe supervisor.
+
+\callout{Read this first}{This model is intended for research and hardware-in-the-loop evaluation. It is \textbf{not} a protection function, and its spatial accuracy does not yet meet the stated acceptance criterion (RMSE 9.22~K NMC, 6.18~K LFP against a target of $\le$ 1.5~K).}
+
+\subsection*{License/Terms of Use}
+Governing Terms: this project is released under the \textbf{MIT License} (see \code{LICENSE} in the repository). The NASA PCoE Battery Data Set is used under its own data-use agreement and is not redistributable.
+
+\subsection*{Benchmarks}
+Table~\ref{tab:bench} lists each acceptance criterion with its target, the measured value where one exists, and a status. \ok{} means the threshold is enforced in shipped code and covered by a regression test. \met{} means a measurement meets the target. \fail{} means a measurement exists and misses the target. Only criteria with a recorded result are listed. Measured values are written to \code{artifacts/pinn\_metrics.json} by \code{scripts/train\_pinn.py}.
+
+{\small
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{3.1cm}>{\raggedright\arraybackslash}p{4.8cm}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{2.2cm}@{}}
+\caption{Acceptance criteria, measured values and status.}\label{tab:bench}\\
+\rowcolor{navy}
+\tablehead{Metric} & \tablehead{Definition} & \tablehead{Target} & \tablehead{Measured} & \tablehead{Status} \\
+\endfirsthead
+\rowcolor{navy}
+\tablehead{Metric} & \tablehead{Definition} & \tablehead{Target} & \tablehead{Measured} & \tablehead{Status} \\
+\endhead
+\rowcolor{sectbg}\multicolumn{5}{@{}l}{\textbf{Spatial temperature prediction}} \\
+Spatial RMSE, NMC & $12\times10\times8$ held-out grid vs.\ reduced pack model & $\le 1.5$ K & 9.22 K & \fail \\
+Spatial RMSE, LFP & as above, LFP branch & $\le 1.5$ K & 6.18 K & \fail \\
+Max absolute error & worst grid node; NMC / LFP & $\le 4.0$ K & 24.13 / 19.50 K & \fail \\
+Mean bias & signed error (pred $-$ ref); NMC / LFP & $\in[-0.5,0.5]$ K & $-7.17$ / $-2.43$ K & \fail \\
+\rowcolor{sectbg}\multicolumn{5}{@{}l}{\textbf{Physical consistency at the returned field}} \\
+Momentum residual & $\mu\nabla^2u-\hat G$; $\nabla\!\cdot u\equiv0$ to $10^{-10}$ & $\le 1$ & exact & \ok \\
+\rowcolor{sectbg}\multicolumn{5}{@{}l}{\textbf{Operational}} \\
+Inference latency & p95, $12\times10\times8$ grid, CPU-only & $\le 800$ ms & 8.06 ms & \met \\
+Parameter count & shared across chemistries & $\le 500{,}000$ & 123,685 & \ok \\
+\rowcolor{sectbg}\multicolumn{5}{@{}l}{\textbf{Cross-chemistry comparative stability}} \\
+Ceiling respected & $T_{peak}$ below comfort ceiling, both branches & true & true & \ok \\
+Margin ordering & LFP margin strictly exceeds NMC margin & true & true & \ok \\
+\rowcolor{sectbg}\multicolumn{5}{@{}l}{\textbf{Calibration (synthetic NASA-style data)}} \\
+$E_a$ recovered & apparent activation energy (seeded at 23.5) & $23.5\pm2$ kJ\,mol$^{-1}$ & 23.50 & \met \\
+$R_0$ recovered & reference resistance (seeded at 19.0~m$\Omega$) & --- & 19.09 m$\Omega$ & \met \\
+Fallback disclosure & dependent responses set \code{synthetic\_fallback} & always true & true & \ok \\
+\bottomrule
+\end{longtable}
+}
+
+\callout{Known gap: spatial accuracy}{The measured RMSE misses the target (9.22~K NMC, 6.18~K LFP against $\le$ 1.5~K), and the mean bias is negative for both chemistries (the network under-predicts: mean prediction 19.8~$^\circ$C against a 27.0~$^\circ$C reference for NMC, 25.3 against 27.7~$^\circ$C for LFP). The reference run was deliberately short (120 Adam epochs plus 20 L-BFGS, against a configured 4,000 plus 320), and its final loss is still of order $10^{10}$. The physics term still dominates the data term, because the NASA-derived labels and the operating point assumed by the PDE are not yet mutually consistent. This is a modelling inconsistency, not an optimisation failure. The calibration rows above recover the values the synthetic generator was seeded with, so they show the regression works; they are not validation against real cells.}
+
+\textbf{Reference training run.} Only the \code{full} configuration has been trained and evaluated (120 Adam epochs plus 20 L-BFGS, CPU, seed 1337).
+
+\begin{table}[h]
+\centering
+\small
+\rowcolors{2}{white}{rowgray}
+\caption{Reference run, full configuration.}\label{tab:ablation}
+\begin{tabular}{@{}lcccc@{}}
+\rowcolor{navy}
+\color{white}\bfseries Configuration & \color{white}\bfseries RMSE NMC (K) & \color{white}\bfseries RMSE LFP (K) & \color{white}\bfseries Final loss & \color{white}\bfseries Time (s) \\
+full (physics, data, adaptive weights) & 9.22 & 6.18 & $3.75\times10^{10}$ & 162.9 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Deployment Geography: Global}
+
+\subsection*{Use Case}
+MicrochannelPINN is intended for:
+\begin{itemize}
+  \item \textbf{Edge-deployed EV battery thermal management.} An on-board inference unit co-located with the BMS MCU, executing at 2~Hz on the telemetry stream and on demand from the dashboard. A receding-horizon scheduler ramps coolant flow before the vehicle enters a high-temperature zone, selecting the smallest flow rate that satisfies the chemistry's comfort ceiling and exotherm-margin floor.
+  \item \textbf{Multi-chemistry hardware-in-the-loop testing.} HIL benches that swap chemistry mid-test without retraining. A third chemistry is a registry entry plus one embedding row; none has been validated.
+\end{itemize}
+
+\textbf{Out-of-scope uses:}
+\begin{itemize}
+  \item \textbf{Protection.} The model does not command contactors or arbitrate a thermal trip.
+  \item \textbf{Chemistry extrapolation.} Conditioning outside \{NMC, LFP\} is unsupported.
+  \item \textbf{Cell-interior absolute temperature.} The network resolves the cold-plate domain; jellyroll gradients enter only through an averaged anisotropic $k_s$.
+  \item \textbf{Degraded-media operation.} Partial channel blockage changes the velocity field in a way the stream-function ansatz cannot represent.
+\end{itemize}
+
+\subsection*{Release Date}
+GitHub (\code{main} branch): \url{https://github.com/Wezo420/heatwave-btms-pinn-dashboard}. Reference metrics generated 16 October 2026 (UTC).
+
+\subsection*{Reference(s)}
+\begin{itemize}
+  \item Project repository: \url{https://github.com/Wezo420/heatwave-btms-pinn-dashboard} (README, \code{SETUP.md}, \code{docs/}).
+  \item Sitzmann et al., ``Implicit neural representations with periodic activation functions,'' NeurIPS 2020 (Siren).
+  \item Wang, Teng and Perdikaris, ``Understanding and mitigating gradient flow pathologies in physics-informed neural networks,'' SIAM J.\ Sci.\ Comput., 2021 (gradient-norm loss balancing).
+  \item Raissi, Perdikaris and Karniadakis, ``Physics-informed neural networks,'' J.\ Comput.\ Phys.\ 378, 2019.
+  \item NASA Prognostics Center of Excellence, ``Battery Data Set,'' 2015. Available at: \url{https://www.nasa.gov/intelligent-systems-division/discovery-and-systems-health/pcoe/pcoe-data-set-repository/}.
+\end{itemize}
+
+% ---------------- Model Architecture ----------------
+\section*{Model Architecture}
+\begin{itemize}
+  \item \textbf{Architecture Type:} Physics-informed neural network (PINN), Siren trunk with FiLM conditioning
+  \item \textbf{Network Architecture:} \code{MicrochannelPINN}: 5-layer Siren trunk, random Fourier feature lift, chemistry embedding, three positive scalar heads
+  \item \textbf{Number of model parameters:} 123,685 (shared across NMC and LFP)
+\end{itemize}
+
+\section*{Model Design}
+\subsubsection*{Trunk}
+The input $(\tilde x,\tilde y,\tilde z,\tilde t)$ (normalised coordinates plus elapsed time in hours) is lifted by random Fourier features
+\begin{equation}
+  \Phi(u)=\big[\sin(2\pi\sigma Bu),\ \cos(2\pi\sigma Bu)\big],\quad B\sim\mathcal{N}(0,\sigma^2 I),\quad \sigma=1.0,
+\end{equation}
+and passed through a 5-layer Siren
+\begin{equation}
+  h_\ell=\sin\!\big(\omega_0^{(\ell)}(W_\ell h_{\ell-1}+b_\ell)\big),\quad \omega_0^{(1)}=12,\ \omega_0^{(\ell>1)}=4.5 .
+\end{equation}
+$\sigma$ is a physical quantity here, not a capacity knob, and is a config value independent of the feature count. The physics loss differentiates the field twice, so the residual scales as $k^2$ in the Fourier wavenumber; tying $\sigma$ to the feature count makes the initial PDE residual grow as $n^2$. At $\sigma=8$ the initial Laplacian was $4.8\times10^{8}$~K\,m$^{-2}$ against a physical source of order $2\times10^{4}$~K\,m$^{-2}$, which starved every other loss term. Fixing $\sigma=1.0$ reduces the initial Laplacian by $39\times$ and the squared residual by $1.5\times10^{3}\times$. It is held fixed, not annealed.
+
+\subsubsection*{Dual-chemistry conditioning}
+A 12-dimensional descriptor $d$ (log-scaled for the resistance term) drives two parallel paths:
+\begin{equation}
+  e_c = E[c] + W_2\,\sigma(W_1 d_c),\qquad h_\ell \leftarrow h_\ell\odot\big(1+\gamma_\ell(e_c)\big)+\beta_\ell(e_c),
+\end{equation}
+where $E\in\mathbb{R}^{2\times n_e}$ is a learned embedding indexed by chemistry $c\in\{\text{NMC},\text{LFP}\}$. $\beta_\ell$ is initialised to zero, so the untrained network is identical for both chemistries and the branches diverge only where data and physics demand it. A multi-output head on a shared trunk was rejected because it interpolates between chemistries in activation space, which is unphysical.
+
+\begin{center}
+\small
+\rowcolors{2}{white}{rowgray}
+\begin{tabular}{@{}lcc@{}}
+\rowcolor{navy}
+\color{white}\bfseries Property & \color{white}\bfseries NMC & \color{white}\bfseries LFP \\
+$c_p$ (J\,kg$^{-1}$\,K$^{-1}$) & 1,040 & 1,150 \\
+Exotherm onset $T_{tr}$ ($^\circ$C) & 210 & 270 \\
+$E_a$ (kJ\,mol$^{-1}$) & 23.5 & 19.8 \\
+Supervisor margin $m_c$ (K) & 45 & 55 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection*{Physical scalar heads}
+Three strictly positive (softplus) outputs are learned jointly with the temperature field: internal resistance $R_{int}$; pressure gradient $\hat G\equiv-\partial p/\partial x$, which fixes coolant mass flow; and $h_{amb}$, a multiplier on the external convection coefficient. Positivity matters because a negative flow rate would silently corrupt the advection term.
+
+\subsubsection*{Physics residual}
+The solid-region energy equation is enforced as an adjoint residual
+\begin{equation}
+  r_s=\rho_s c_{p,s}\partial_t T_s-\nabla\!\cdot(k_s\nabla T_s)-\frac{I^2R_{int}(T_s,\mathrm{SOC})}{V_{cell}}-q'''_{aux},
+\end{equation}
+with the Arrhenius-corrected resistance
+\begin{equation}
+  R_{int}(T,\mathrm{SOC})=R_{ref}\exp\!\Big[\frac{E_a}{R_g}\Big(\frac{1}{T_{ref}}-\frac{1}{T}\Big)\Big]\big[1+0.35(1-2\,\mathrm{SOC})^2\big].
+\end{equation}
+Fluid regions satisfy advection--diffusion (50/50 glycol, $c_p=3{,}400$ J\,kg$^{-1}$\,K$^{-1}$). Conjugate coupling imposes $T_s-T_f=0$ and $k_s\partial_n T_s=k_f\partial_n T_f$ at the bonded interface. In-channel heat transfer uses the Shah--London constant-heat-flux Nusselt number with a Hausen entrance enhancement; its square-duct limit gives exactly 3.92.
+
+\subsubsection*{Momentum via stream function}
+Velocity is imposed analytically from the learned pressure gradient:
+\begin{equation}
+  \psi=-\tfrac12\hat G f(y,z),\qquad u=(\partial_y\psi,\,-\partial_x\psi,\,0).
+\end{equation}
+This gives exactly $\nabla\!\cdot u\equiv0$, no-slip on all four walls, and a vanishing convective term, reducing the $x$-momentum residual to $\mu\nabla^2u-\hat G=0$. The flow$\leftrightarrow$pressure-gradient round trip is exact. Because $\hat G$ is a network output, the coolant loop is a learned boundary condition.
+
+\subsubsection*{Gradient-penalty loss rebalancing}
+The loss terms start three to five orders of magnitude apart. Following Wang, Teng and Perdikaris, weights are adapted from gradient norms on the shared parameters (Siren trunk and FiLM modulators):
+\begin{equation}
+  \hat L_i=\big\|\nabla_{\theta_{shared}}L_i\big\|_2,\quad
+  \lambda_i^{(t+1)}=(1-\alpha)\lambda_i^{(t)}+\alpha\frac{\hat L_i}{\max_j\hat L_j},\quad
+  L_{total}=\sum_i\lambda_i L_i,\quad \alpha=0.999 .
+\end{equation}
+The gradient norm carries a floor of $10^{-8}$, and each $\lambda_i$ is clipped to $[10^{-3},10^{3}]$. Static priors ($\lambda_{data}=25$, $\lambda_{bc}=10$, $\lambda_{ic}=10$, $\lambda_{pde}=1$) are the initialisation and the fixed-weights ablation setting.
+
+\section*{Training Methodology}
+\textbf{Stage 1: Calibration of internal resistance.}
+\begin{itemize}
+  \item For constant-current discharge, $V_k=\mathrm{OCV}(\mathrm{SOC}_k)-IR_{int}$ with an incremental-capacity OCV surface.
+  \item NASA \code{.mat} run-to-failure files (B0005--B0034) are parsed by a three-stage reader chain (SciPy v5, h5py v7.3, pure-Python v5). $R_{int}$ and apparent $E_a$ come from a temperature- and SOC-binned weighted least-squares fit of $\ln R(T,z)=\ln R_0-\frac{E_a}{R_g}\big(\frac1T-\frac1{T_{ref}}\big)+c_2z^2+c_1z$.
+  \item The NASA cells are cylindrical 18650 cells, not the target prismatic pouch cells, so the fitted $R_{int}$ is blended with the chemistry datasheet anchor by inverse variance before it initialises the network head.
+\end{itemize}
+
+\textbf{Stage 2: Physics-informed training.}
+\begin{itemize}
+  \item Joint minimisation of data, boundary, initial-condition and PDE terms under the gradient-penalty scheme.
+  \item One integer seed (1337) for Python, NumPy and Torch; \code{cudnn.deterministic} set and benchmarking disabled, so \code{--ablation} reproduces the metrics table on the same machine.
+  \item Entry point \code{scripts/train\_pinn.py}; \code{--quick} is a roughly 2-minute smoke test, \code{--ablation} the full table.
+\end{itemize}
+
+\textbf{Training configuration} (from \code{artifacts/pinn\_metrics.json}):
+
+\begin{center}
+\small
+\rowcolors{2}{white}{rowgray}
+\begin{tabular}{@{}lr@{\hspace{2em}}lr@{}}
+\rowcolor{navy}
+\color{white}\bfseries Setting & \color{white}\bfseries Value & \color{white}\bfseries Setting & \color{white}\bfseries Value \\
+Hidden width & 128 & Chemistry embedding dim & 32 \\
+Hidden layers & 5 & Fourier features & 48 \\
+Fourier $\sigma$ & 1.0 & $\omega_0$ / hidden $\omega_0$ & 12 / 4.5 \\
+Learning rate & $3\times10^{-4}$ & Weight EMA & 0.999 \\
+Gradient clip & 5.0 & Seed & 1337 \\
+Boundary samples & 512 & Collocation samples & 2048 \\
+Configured epochs (Adam / L-BFGS) & 4000 / 320 & Reference run (Adam / L-BFGS) & 120 / 20 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The reference run behind Table~\ref{tab:bench} is the short run (162.9~s on CPU, torch 2.14.1+cpu, Windows AMD64), not the full 4000-epoch schedule.
+
+\textbf{Stage 3: Anticipatory control (downstream, non-learned).}
+\begin{itemize}
+  \item A receding-horizon scheduler sweeps candidate flow rates in ascending order over a reduced 12-cell model and picks the smallest rate meeting the comfort ceiling and exotherm-margin floor, so it does not over-cool.
+  \item A first-order ambient lag ($\tau=420$ s) models enclosure thermal mass.
+\end{itemize}
+
+% ---------------- Input / Output ----------------
+\section*{Input}
+\begin{itemize}
+  \item \textbf{Input Type(s):} Numeric (coordinates, time, operating point) and categorical (chemistry key)
+  \item \textbf{Input Format(s):} Float tensors; chemistry key $c\in\{\text{NMC},\text{LFP}\}$ mapped to a 12-dimensional descriptor
+  \item \textbf{Input Parameters:} Four-Dimensional (4D) query point $(x,y,z,t)$ with $t$ in hours, plus five operating-point scalars: pack current, state of charge, coolant inlet temperature, coolant mass flow, ambient temperature
+  \item \textbf{Other Properties Related to Input:} Domain $\Omega\subset[0,0.360]\times[0,0.230]\times[0,0.012]$ m. Trained on the NASA 18650 temperature range (290--315 K) mapped onto the pack geometry; operation well outside it is extrapolation.
+\end{itemize}
+
+\section*{Output}
+\begin{itemize}
+  \item \textbf{Output Type(s):} Temperature field (scalar), internal resistance, pressure gradient, convection multiplier, diagnostics
+  \item \textbf{Output Format:} Float tensors and JSON fields from the FastAPI service
+  \item \textbf{Output Parameters:} Scalar temperature $T$ per query point; scalars $R_{int}$, $\hat G$, $h_{amb}$
+  \item \textbf{Other Properties Related to Output:} Every field ships with its adjoint residual and an \code{is\_converged} flag. Point queries return a local-stencil standard deviation as an uncertainty proxy (not a calibrated posterior). Coolant outlet temperature and heat rejection are computed algebraically from the field and mass flow. Responses depending on synthetic data set \code{synthetic\_fallback: true}.
+\end{itemize}
+
+% ---------------- Software Integration ----------------
+\section*{Software Integration}
+\begin{itemize}
+  \item \textbf{Runtime Engine(s):} PyTorch; FastAPI served with Uvicorn on port 8000; LangGraph (self-healing monitor)
+  \item \textbf{Dashboard:} Next.js 14 (App Router), Recharts, Tailwind CSS, served on port 3000
+  \item \textbf{Supported Hardware:} Edge-class CPU (latency target); CUDA GPU recommended for training
+  \item \textbf{Operating System(s):} Windows AMD64 (reference run and README commands); torch 2.14.1+cpu
+  \item \textbf{Test Suite:} 228 pytest tests (about 4 minutes), including a LangGraph graph-wiring suite (about 25 seconds)
+\end{itemize}
+Residual diagnostics run in 60-bit floating point on CPU, because \code{torch.autograd} double-backward is unavailable on Apple MPS and less stable on GPU. Integration into a control system requires additional testing with use-case-specific data, with iterative unit- and system-level validation before deployment.
+
+\section*{Model Version(s)}
+\begin{itemize}
+  \item v1.0 -- research release for HIL evaluation; checkpoint \code{artifacts/pinn\_dual\_chemistry.pt}
+\end{itemize}
+
+% ---------------- Datasets ----------------
+\section*{Training and Evaluation Datasets}
+\textbf{Data Modality:} Numeric, physics-derived \\
+\textbf{Data Collection Method:} Hybrid: published physics correlations, public empirical data, synthetic fallback \\
+\textbf{Labeling Method:} Automated (reduced-order model targets, residual evaluation)
+
+{\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{3.8cm}@{}}
+\rowcolor{navy}
+\tablehead{Source} & \tablehead{Use} & \tablehead{Provenance} \\
+NASA PCoE Battery Data Set (B0005--B0034) & Regression of $R_{int}$, $E_a$ and capacity fade $Q(n)=Q_0e^{-\kappa n}$ & Public; own data-use agreement; not redistributable; loaded with \code{scripts/download\_nasa.py}. Available at: \url{https://www.nasa.gov/intelligent-systems-division/discovery-and-systems-health/pcoe/pcoe-data-set-repository/} \\
+Synthetic run-to-failure generator & Deterministic fallback with statistics matching the published cells; used in the shipped repository & Synthetic; every dependent response sets \code{synthetic\_fallback: true} and the dashboard shows a banner \\
+Governing equations and correlations (Shah--London, Hausen, Churchill--Chu, Arrhenius) & Physics residual terms & Published literature \\
+Reduced-order pack model & Held-out spatial evaluation target (carries calibrated $R_{int}$ and convective conductance, not the network) & Project-generated \\
+Dashboard GPS and weather & Demonstrates the anticipatory controller & Synthetic, labelled as such \\
+\bottomrule
+\end{tabularx}
+}
+
+No personal data, no real-vehicle location data, and no telemetry from any identifiable user enters training.
+
+\textbf{Evaluation datasets.} Spatial accuracy is measured on a $12\times10\times8$ held-out grid against the reduced-order pack model. Physical consistency is the mean squared adjoint residual over 256 collocation points. Operational metrics are latency over the 2~Hz telemetry stream and cross-chemistry stability over the reference heatwave route.
+
+% ---------------- Inference ----------------
+\section*{Inference}
+\begin{itemize}
+  \item \textbf{Engine:} PyTorch behind FastAPI; deterministic forward path (no sampling)
+  \item \textbf{Test Hardware:} CPU only (no GPU), Windows AMD64, torch 2.14.1+cpu
+  \item \textbf{Measured latency:} p95 8.06~ms and 7.87~ms per grid on the $12\times10\times8$ evaluation grid (7.67~ms for the LFP branch); target is $\le 800$ ms at 2~Hz on the $18\times12\times8$ dashboard grid, so the measured figure leaves a wide margin
+  \item \textbf{Footprint:} 123,685 parameters; fits a 2~MB budget in 16-bit fixed point (validation of the quantised model is out of scope)
+\end{itemize}
+
+\section*{Other Considerations}
+\subsection*{Explainability}
+\begin{tabularx}{\linewidth}{@{}KV@{}}
+\toprule
+Intended domain & EV battery thermal management \\
+\midrule
+Output & Temperature field, $R_{int}$, $\hat G$, $h_{amb}$, adjoint residual, \code{is\_converged}, uncertainty proxy. Deciding terms are returned rather than a summary string. \\
+\midrule
+Technical limitations & Stream-function ansatz excludes blockage. Coolant properties are assumed isotropic and temperature-independent over 25--45~$^\circ$C, under-predicting viscosity drift by about 12\% at the upper end. Pack-to-plinth conduction is a single multiplier. The 420~s ambient lag mis-fires in unmodelled micro-climates (underpass, tunnel, dense canopy); the dashboard shows the predicted effective ambient separately from the raw reading. \\
+\midrule
+Verified to have met requirements & Parameter count, momentum residual, latency target, exotherm-margin ordering and anticipation benefit. \textcolor{bad}{\textbf{Not met:}} spatial RMSE (9.22~K NMC, 6.18~K LFP against $\le 1.5$~K). \\
+\midrule
+Performance metrics & Spatial RMSE, max error, mean bias, PDE/momentum/interface/BC residuals, latency, exotherm margin. \\
+\midrule
+Potential known risks & A correct but confident network on out-of-distribution inputs; a conditioning-path failure presenting as a plausible but wrong temperature for both chemistries. \\
+\midrule
+Licensing & MIT \\
+\bottomrule
+\end{tabularx}
+
+\subsection*{Safety \& Security}
+\textbf{The network is advisory; actuation is not.} The fail-safe supervisor is a deterministic three-tier state machine evaluated every tick:
+\begin{align*}
+  \text{ok}\to\text{derate} &\quad\text{when } T_{tr}-T_{peak}<m_c \ \ (\text{derate current to }70\%,\ \dot m\to\max)\\
+  \text{derate}\to\text{ok} &\quad\text{when margin recovers by 4 K (hysteresis)}\\
+  \text{any}\to\text{trip} &\quad\text{when } T_{peak}\ge T_{tr}\ \ (\text{latched})
+\end{align*}
+with $m_c=45$ K for NMC and $55$ K for LFP. A latched trip pins coolant to maximum flow, commands zero pack current, and cannot be cleared by an operator flow command. Only an explicit safety reset clears it; in a production vehicle that reset must be interlocked with a physical pack-temperature check. In the demonstration configuration it is not interlocked.
+
+\begin{tabularx}{\linewidth}{@{}KV@{}}
+\toprule
+Physical safety impact & Thermal runaway risk if the model were wrongly trusted as a protection function. Mitigated by hard-coded thresholds ($T_{tr}=210\,^\circ$C NMC, $270\,^\circ$C LFP) and a non-learned supervisor; the network can neither learn nor bypass either. \\
+\midrule
+Distribution-shift handling & (1) Every field ships its adjoint residual; above-threshold fields are flagged \code{is\_converged: false}. (2) The Arrhenius argument is sanitised and the tanh temperature decoder is bounded, so a drifted sensor yields a large but finite loss and a flagged field, never a silent NaN. (3) A local-stencil uncertainty proxy flags extrapolation. \\
+\midrule
+Determinism & No sampling on the forward path; fixed seeds; derived quantities computed from the field. \code{chemistry\_invariance\_report} asserts a non-zero inter-chemistry delta to detect a silently disconnected conditioning path. Each chemistry has its own supervisor instance. \\
+\midrule
+Human oversight & Operator coolant override is rate-limited locally and by the backend, and is disabled while a trip is latched. \\
+\midrule
+Misuse & Treating a 45~K modelled margin as a warranty. It depends on assumed coolant properties, assumed pack-to-plinth conduction, and a controller whose anticipation can mis-fire. It is engineering evidence for an HIL programme, not a safety case. \\
+\bottomrule
+\end{tabularx}
+
+\subsubsection*{Autonomous self-healing and its limits}
+A LangGraph monitor classifies a backend crash, hypothesises a root cause, patches, verifies and restarts the service, or escalates:
+\begin{lstlisting}[language={}]
+monitor --healthy--> report --> END
+  | crash
+classify --no traceback--> escalate --> END
+hypothesise --UNKNOWN--> diagnose_llm --> patch
+patch --not applied--> escalate
+verify --static fail--> rollback --> monitor  (same baseline)
+restart --healthy--> report --> END
+\end{lstlisting}
+Three properties bound it. \textbf{Restart precedes patching}, because most crashes are transient. \textbf{Rollback precedes retry}, so attempt $N{+}1$ starts from the same baseline as attempt 1. \textbf{Escalation is a terminal state}, not an exception. Patches require hypothesis confidence above 0.5, are limited to an allow-list of repository paths, and are backed up, syntax-checked, written atomically and rolled back on failed verification. The monitor \textbf{may not modify safety logic}: request-validation errors route to no action, and patching the supervisor, thresholds or margins is a change to the safety case, not a configuration option.
+
+\vspace{0.4em}
+\callout{Endorsement and its boundary}{On the evidence assembled here, MicrochannelPINN is suitable for hardware-in-the-loop evaluation as the predictive element of a thermal management control loop. It is not a protection function, and nothing in it may be wired to one. The endorsement extends to the design and verification methodology, not to a spatial accuracy figure: measured RMSE is currently above the target in Table~\ref{tab:bench}.}
+
+% ---------------- Citation ----------------
+\section*{Citation}
+\begin{lstlisting}[language={}]
+@misc{microchannelpinn2026,
+  title        = {MicrochannelPINN: Dual-Chemistry Physics-Informed Neural
+                  Network for Heatwave-Aware Microchannel Battery Thermal
+                  Management},
+  author       = {{Heatwave-Aware BTMS Project Team}},
+  year         = {2026},
+  howpublished = {\url{https://github.com/Wezo420/heatwave-btms-pinn-dashboard}},
+  note         = {Model card, v1.0}
+}
+\end{lstlisting}
+
+\begin{thebibliography}{9}
+\bibitem{siren} V.~Sitzmann, J.~Martel, A.~Bergman, D.~Lindell, G.~Wetzstein, ``Implicit neural representations with periodic activation functions,'' in \textit{Proc.\ NeurIPS}, 2020.
+\bibitem{wang2021} S.~Wang, Y.~Teng, P.~Perdikaris, ``Understanding and mitigating gradient flow pathologies in physics-informed neural networks,'' \textit{SIAM J.\ Sci.\ Comput.}, vol.~43, no.~5, 2021.
+\bibitem{raissi2019} M.~Raissi, P.~Perdikaris, G.~E.~Karniadakis, ``Physics-informed neural networks,'' \textit{J.\ Comput.\ Phys.}, vol.~378, pp.~686--707, 2019.
+\bibitem{nasa} NASA Prognostics Center of Excellence, ``Battery Data Set,'' 2015. Available at: \url{https://www.nasa.gov/intelligent-systems-division/discovery-and-systems-health/pcoe/pcoe-data-set-repository/}.
+\bibitem{shah} R.~K.~Shah and A.~L.~London, \textit{Laminar Flow Forced Convection in Ducts}, Academic Press, 1978.
+\end{thebibliography}
+\end{document}
