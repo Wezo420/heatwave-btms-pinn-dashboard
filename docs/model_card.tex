@@ -17,7 +17,7 @@
 %   (210 degC / 270 degC exotherm onset, cp = 1040 / 1150 J/(kg K), the
 %   800 ms latency budget) is enforced somewhere in the shipped code.
 %=======================================================================
-\documentclass[journal,10pt,compsoc]{IEEEtran}
+\documentclass[journal,10pt,compsoc,onecolumn]{IEEEtran}
 
 %-----------------------------
 % PACKAGES (all standard IEEEtran-compatible)
@@ -38,10 +38,11 @@
 \usepackage{url}          % \url for the dataset reference
 \usepackage{enumitem}     % compact itemise/enumerate
 \usepackage{ragged2e}     % \RaggedRight in table cells
-\usepackage{balance}      % balance the final two columns
+% \usepackage{balance}      % balance the final two columns
 \usepackage{microtype}    % improved justification at 10pt
 \usepackage[font=footnotesize,labelsep=period]{caption}
 \usepackage{titlesec}
+\usepackage[margin=1.1in]{geometry}
 
 % Give the numbered sections a coloured rule beneath them. This is a visual
 % anchor, not decoration: a reviewer scanning for "Metrics and Benchmarks" or
@@ -112,7 +113,7 @@
 \large Dual-Chemistry Physics-Informed Neural Network for\\ Heatwave-Aware
 Microchannel Battery Thermal Management}
 \author{Heatwave-Aware BTMS Project Team\\
-\small Department of Computer Science / Applied AI Laboratory}
+\small Branch AI \& Data Science / Generative AI Laboratory}
 \maketitle
 
 % ---------------------------------------------------------------------------
@@ -577,7 +578,7 @@ loss. \emph{Operational} metrics are latency and cross-chemistry stability.
 Measured values are written to \texttt{artifacts/pinn\_metrics.json} by
 \texttt{scripts/train\_pinn.py}.
 
-\begin{table*}[t]
+\begin{table}[t]
 \caption{Acceptance criteria and measured performance. ``Target'' is the threshold
 each metric must meet; ``Status'' is populated from
 \texttt{artifacts/pinn\_metrics.json} once the training run that produces it has
@@ -633,7 +634,7 @@ $e_a$ estimate       & apparent activation energy with standard error, NMC & \SI
 Fallback disclosure  & every response depending on synthetic data sets \texttt{synthetic\_fallback} & $\text{always}true$ & \textbf{verified} \\
 \bottomrule
 \end{tabularx}
-\end{table*}
+\end{table}
 
 \begin{table}[t]
 \caption{Loss ablation: contribution of each term. Reproduced from
